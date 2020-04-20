@@ -38,7 +38,7 @@ public class Main {
         return System.currentTimeMillis() - startTime;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
 
         float[] arr = new float[size];
         float[] a1 = new float[h];
@@ -79,12 +79,8 @@ public class Main {
         startTime = System.currentTimeMillis();
         first.start();
         second.start();
-        first.interrupt();
-        second.interrupt();
-
-        // Здесь могла быть Ваша реклама :)))
-
-        while (first.isInterrupted() & second.isInterrupted()) {System.nanoTime();}
+        first.join();
+        second.join();
 
         System.out.println("Время вычисления массива потоками (msec) " + (System.currentTimeMillis()-startTime));
         System.out.println("Время склейки массива потоком (msec) " + (stikArray(a1,a2,arr)));
@@ -102,9 +98,8 @@ public class Main {
         CalculateArrayThred t2 = new CalculateArrayThred(0,a2);
         t1.start();
         t2.start();
-        t1.interrupt();
-        t2.interrupt();
-        while (t1.isInterrupted() & t2.isInterrupted()) {System.nanoTime();}
+        t1.join();
+        t2.join();
 
         // Склеиваем массивы
         stikArray(a1,a2,arr);
