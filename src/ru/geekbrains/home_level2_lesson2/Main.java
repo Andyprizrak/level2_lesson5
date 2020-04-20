@@ -11,8 +11,7 @@ public class Main {
             startTime = System.currentTimeMillis();
             for (int i = 0; i < size; i++) arr[i] = 1;
             endTime = System.currentTimeMillis();
-        }
-          else {
+        } else {
             startTime = System.currentTimeMillis();
             for (int i = 0; i < size; i++)
                 arr[i] = (float) (arr[i] * Math.sin(0.2f + i / 5) * Math.cos(0.2f + i / 5) * Math.cos(0.4f + i / 2));
@@ -25,8 +24,8 @@ public class Main {
     // Метод разделяет исходный массив на 2 массива. Возвращает время заполнения в миллисекундах
     private static long divadedArray(float[] arr, float[] a1, float[] a2) {
         long startTime = System.currentTimeMillis();
-        System.arraycopy(arr, 0, a1, 0, Main.h);
-        System.arraycopy(arr, Main.h, a2, 0, Main.h);
+        System.arraycopy(arr, 0, a1, 0, h);
+        System.arraycopy(arr, h, a2, 0, h);
         return System.currentTimeMillis() - startTime;
     }
 
@@ -38,12 +37,18 @@ public class Main {
         return System.currentTimeMillis() - startTime;
     }
 
+    private static int checkArray (float[] arr, float[] arr1) {
+        for (int i =0; i < arr.length; i++)
+            if (arr[i] != arr1[i]) return i;
+        return 0;
+    }
+
     public static void main(String[] args) throws InterruptedException {
 
         float[] arr = new float[size];
+        float[] arr1 = new float[size];
         float[] a1 = new float[h];
         float[] a2 = new float[h];
-        long startTime;
 
         // Заполняем  массив "1" выводим время
         System.out.println("Время заполнения массива еденицей (msec) " + fillArrayNumber(size,arr,1));
@@ -51,62 +56,21 @@ public class Main {
         // Вычисляем эдементы массива, выводим время
         System.out.println("Время вычисления массива простой метод (msec) " + fillArrayNumber(size,arr,2));
 
-        // Заполняем  массив "1" выводим время
-       fillArrayNumber(size,arr,1);
-
-        Thread first = new Thread() {
-            @Override
-            public void run() {
-                for (int i =0; i < h; i++)
-                    a1[i] = (float) (a1[i] * Math.sin(0.2f + i / 5) * Math.cos(0.2f + i / 5) * Math.cos(0.4f + i / 2));
-                interrupt();
-            }
-        };
-        Thread second = new Thread() {
-            @Override
-            public void run() {
-                for (int i =0; i < h; i++) {
-                    a2[i] = (float) (a2[i] * Math.sin(0.2f + i / 5) * Math.cos(0.2f + i / 5) * Math.cos(0.4f + i / 2));
-                }
-                interrupt();
-            }
-        };
-
-        // Разбиваем массив, выводим время
-        System.out.println("Время разбивки массива (msec) " + divadedArray(arr,a1,a2));
-
-        // Запускаем потоки
-        startTime = System.currentTimeMillis();
-        first.start();
-        second.start();
-        first.join();
-        second.join();
-
-        System.out.println("Время вычисления массива потоками (msec) " + (System.currentTimeMillis()-startTime));
-        System.out.println("Время склейки массива потоком (msec) " + (stikArray(a1,a2,arr)));
-
-
-        System.out.println("Проверка элементов массива " + arr[0] +" " +arr[1] + " "+ arr[9_999_998] + " " +arr[9_999_999]);
-
-        //  Решение через отдельный класс
-
         // Заполняем 1 и разбиваем на 2 массива
-        fillArrayNumber(size,arr,1);
-        divadedArray(arr,a1,a2);
-
-        CalculateArrayThred t1 = new CalculateArrayThred(0,a1);
-        CalculateArrayThred t2 = new CalculateArrayThred(0,a2);
+        fillArrayNumber(size,arr1,1);
+        divadedArray(arr1,a1,a2);
+        CalculateArrayThred t1 = new CalculateArrayThred(0,a1,0);
+        CalculateArrayThred t2 = new CalculateArrayThred(0,a2,h);
         t1.start();
         t2.start();
         t1.join();
         t2.join();
 
         // Склеиваем массивы
-        stikArray(a1,a2,arr);
+        stikArray(a1,a2,arr1);
         System.out.println("Время расчета потоком 1 " + t1.getTime());
         System.out.println("Время расчета потоком 2 " + t2.getTime());
-
-        System.out.println("Проверка элементов массива " + arr[0] +" " +arr[1] + " "+ arr[9_999_998] + " " +arr[9_999_999]);
+        System.out.println(checkArray(arr,arr1));
 
     }
 }
